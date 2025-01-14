@@ -1,44 +1,63 @@
-const {Model, DataTypes} = require('sequelize');
-const sequelize = require('./config/database');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/database');
+const User = require('./userModel');
 
-class Contact extends Model {}
-
-Contact.init({
-    //assuming 'user_id' is foreign key
-    user_id:{
+const Contact = sequelize.define('Contact', {
+    id: {
         type: DataTypes.INTEGER,
-        allowNull:false,
-        references:{
-            model: 'Users', //table name of user model
-            key: 'id',
+        primaryKey: true,
+        autoIncrement: true
+    },
+    user_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'users',
+            key: 'id'
+        },
+        validate: {
+            notNull: { msg: 'User ID is required' }
         }
     },
     name: {
         type: DataTypes.STRING,
         allowNull: false,
         validate: {
-          notEmpty: { msg: "Please add the contact name" }
+            notNull: { msg: 'Name is required' },
+            notEmpty: { msg: 'Name is required' }
         }
-      },
-      email: {
+    },
+    email: {
         type: DataTypes.STRING,
         allowNull: false,
         validate: {
-          isEmail: { msg: "Please add a valid email address" },
-          notEmpty: { msg: "Please add the email address" }
+            notNull: { msg: 'Email Address is required' },
+            notEmpty: { msg: 'Email Address is required' },
+            isEmail: { msg: 'Please enter a valid email address' }
         }
-      },
-      phone: {
+    },
+    phone: {
         type: DataTypes.STRING,
         allowNull: false,
         validate: {
-          notEmpty: { msg: "Please add the contact phone number" }
+            notNull: { msg: 'Contact Phone Number is required' },
+            notEmpty: { msg: 'Contact Phone Number is required' }
         }
-      },
-    }, {
-      sequelize, // This is the instance of Sequelize you imported
-      modelName: 'Contact',
-      timestamps: true, // This enables the automatic creation of 'createdAt' and 'updatedAt' fields
+    }
+}, {
+    timestamps: true,
+    tableName: 'contacts'
 });
-    
+
+// Define the relationship between Contact and User
+Contact.belongsTo(User, {
+    foreignKey: 'user_id',
+    as: 'user'
+});
+
+User.hasMany(Contact, {
+    foreignKey: 'user_id',
+    as: 'contacts'
+});
+
 module.exports = Contact;

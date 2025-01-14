@@ -17,15 +17,18 @@ const sequelize = new Sequelize(database, username, password, {
 });
 
 async function connectDb() {
-  return sequelize.authenticate()
-    .then(() => {
-      console.log('Connection has been established successfully.');
-      return sequelize;
-    })
-    .catch(err => {
-      console.error('Unable to connect to the database:', err);
-      throw err;
-    });
+  try {
+      await sequelize.authenticate();
+      console.log("Connection has been established successfully.");
+
+      // Add this to create tables
+      await sequelize.sync({ alter: true });
+      console.log("All models were synchronized successfully.");
+
+  } catch (error) {
+      console.error("Unable to connect to the database:", error);
+      throw error;
+  }
 }
 
 module.exports = {connectDb,sequelize};

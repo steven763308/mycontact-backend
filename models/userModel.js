@@ -1,7 +1,7 @@
 const { Sequelize, DataTypes } = require('sequelize');
 
 // Establishing a connection to the database
-const sequelize = new Sequelize('mysql://user:password@localhost:3306/mydb', {
+const sequelize = new Sequelize('mysql://app_user:password123@localhost:3306/mycontacts', {
     logging: false, // Disables logging; set to console.log to see SQL queries
     define: {
         freezeTableName: true // Disables the automatic pluralization of table names

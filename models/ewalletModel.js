@@ -1,0 +1,1 @@
+//can add new balance, can deduct, can transfer to another user, read function get user balance
