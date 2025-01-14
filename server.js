@@ -21,7 +21,7 @@ app.use("/api/contacts", require("./routes/contactRoutes"));
 app.use("/api/users", require("./routes/userRoutes"));
 
 //ewallet
-//app.use("/api/ewallet", require("./routes/ewalletRoutes"));
+app.use("/api/ewallet", require("./routes/ewalletRoutes"));
 app.use(errorHandler);
 
 app.listen(port, () => {
