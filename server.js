@@ -3,6 +3,7 @@ const express = require("express");
 const { connectDb, sequelize } = require("./config/database");
 const errorHandler = require("./middleware/errorHandler");
 const dotenv = require("dotenv").config();
+const cors = require("cors"); //added cors package
 
 connectDb().then(() => {
     sequelize.sync(); // Sync all models
@@ -10,6 +11,16 @@ connectDb().then(() => {
 
 const app = express();
 const port = process.env.PORT || 5000;
+
+//CORS configuration
+app.use(cors({
+    origin: process.env.NODE_ENV === 'production'
+    ? 'https://ewallet-frontend-1.herokuapp.com' 
+    : 'http://localhost:5000',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], //allowed method
+    allowedHeaders: ['Content-Type', 'Authorization'], //allowed headers
+    credentials: true //enable set cookie
+}));
 
 // Add this before your routes
 app.use((req, res, next) => {

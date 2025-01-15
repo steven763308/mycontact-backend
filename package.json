@@ -20,6 +20,7 @@
   "homepage": "https://github.com/steven763308/node.js-express---bsdapp#readme",
   "dependencies": {
     "bcrypt": "^5.1.1",
+    "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "express-async-handler": "^1.2.0",
