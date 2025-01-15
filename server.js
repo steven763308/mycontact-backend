@@ -17,6 +17,12 @@ app.use((req, res, next) => {
 });
 
 app.use(express.json());
+
+app.get("/", (req, res) => {
+    res.send("API is running successfully");
+    console.log("GET / endpoint hit");
+  });
+
 app.use("/api/contacts", require("./routes/contactRoutes"));
 app.use("/api/users", require("./routes/userRoutes"));
 //ewallet

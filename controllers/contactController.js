@@ -1,86 +1,112 @@
 const asyncHandler = require("express-async-handler");
-const Contact = require("../models/contactModel");
-//@desc Get all contacts
-//@route GET /api/contacts
-//@access private
+const Contact = require('../models/contactModel'); // Ensure this path is correct
+const User = require('../models/userModel'); // Ensure this is correctly imported if used
+
+// Get all contacts
 const getContacts = asyncHandler(async (req, res) => {
-    const contacts = await Contact.find({user_id: req.user.id});
-    res.status(200).json(contacts);
+    try {
+        console.log("Fetching contacts for user ID:", req.user.id);
+
+        // Fetch all contacts associated with the user ID
+        const contacts = await Contact.findAll({
+            where: { user_id: req.user.id }
+        });
+
+        console.log("Contacts fetched:", JSON.stringify(contacts, null, 2));
+        res.status(200).json(contacts);
+    } catch (error) {
+        console.error("Error fetching contacts:", error);
+        res.status(500).json({ message: "Failed to fetch contacts", error: error.message });
+    }
 });
 
-//@desc Create New contact
-//@route POST /api/contacts
-//@access private
+// Create a new contact
 const createContact = asyncHandler(async (req, res) => {
-    console.log("The request body is: ",req.body);
-    const {name, email,  phone} = req.body;
-    if(!name || !email || !phone){
-        res.status(400);
-        throw new Error("All fields are mandatory !");
+    const { name, email, phone } = req.body;
+    if (!name || !email || !phone) {
+        res.status(400).json({ message: "All fields are mandatory!" });
+        return;
     }
-    const contact = await Contact.create({
-        name,
-        email,
-        phone,
-        user_id: req.user.id
-    });
+    try {
+        const contact = await Contact.create({
+            name,
+            email,
+            phone,
+            user_id: req.user.id
+        });
 
-    res.status(201).json(contact);
+        res.status(201).json(contact);
+    } catch (error) {
+        console.error("Error creating contact:", error);
+        res.status(500).json({ message: "Failed to create contact", error: error.message });
+    }
 });
 
-//@desc Get contact
-//@route GET /api/contacts/:id
-//@access private
+// Get a single contact
 const getContact = asyncHandler(async (req, res) => {
-        const contact = await Contact.findById(req.params.id);
-        if(!contact){
-            res.status(404);
-            throw new Error ("Contact not found");
+    try {
+        const contact = await Contact.findByPk(req.params.id);
+        if (!contact) {
+            res.status(404).json({ message: "Contact not found" });
+            return;
         }
-    res.status(200).json(contact);
+        // Check if the logged-in user owns the contact
+        if (contact.user_id.toString() !== req.user.id) {
+            res.status(403).json({ message: "User doesn't have permission to view this contact" });
+            return;
+        }
+
+        res.status(200).json(contact);
+    } catch (error) {
+        console.error("Error fetching contact:", error);
+        res.status(500).json({ message: "Failed to fetch contact", error: error.message });
+    }
 });
 
-//@desc Update contact
-//@route PUT /api/contacts/:id
-//@access private
+// Update a contact
 const updateContact = asyncHandler(async (req, res) => {
-    const contact = await Contact.findById(req.params.id);
-    if(!contact){
-        res.status(404);
-        throw new Error ("Contact not found");
+    try {
+        const contact = await Contact.findByPk(req.params.id);
+        if (!contact) {
+            res.status(404).json({ message: "Contact not found" });
+            return;
+        }
+
+        // Check if the logged-in user owns the contact
+        if (contact.user_id.toString() !== req.user.id) {
+            res.status(403).json({ message: "User doesn't have permission to update this contact" });
+            return;
+        }
+
+        const updatedContact = await contact.update(req.body);
+        res.status(200).json(updatedContact);
+    } catch (error) {
+        console.error("Error updating contact:", error);
+        res.status(500).json({ message: "Failed to update contact", error: error.message });
     }
-
-    if(contact.user_id.toString()!==req.user.id){
-        res.status(403);
-        throw new Error("User don't have permission to update other user contacts");
-    }
-
-    const updatedContact = await Contact.findByIdAndUpdate(
-        req.params.id,
-        req.body,
-        { new: true }
-    );
-
-    res.status(200).json(updatedContact);
 });
 
-//@desc Delete contact
-//@route DELETE /api/contacts/:id
-//@access private
+// Delete a contact
 const deleteContact = asyncHandler(async (req, res) => {
-    const contact = await Contact.findById(req.params.id);
-    if(!contact){
-        res.status(404);
-        throw new Error ("Contact not found");
-    }
+    try {
+        const contact = await Contact.findByPk(req.params.id);
+        if (!contact) {
+            res.status(404).json({ message: "Contact not found" });
+            return;
+        }
 
-    if(contact.user_id.toString()!==req.user.id){
-        res.status(403);
-        throw new Error("User don't have permission to update other user contacts");
-    }
+        // Check if the logged-in user owns the contact
+        if (contact.user_id.toString() !== req.user.id) {
+            res.status(403).json({ message: "User doesn't have permission to delete this contact" });
+            return;
+        }
 
-    await Contact.deleteOne({_id: req.params.id});
-    res.status(200).json(contact);
+        await contact.destroy();
+        res.status(200).json({ message: "Contact deleted successfully" });
+    } catch (error) {
+        console.error("Error deleting contact:", error);
+        res.status(500).json({ message: "Failed to delete contact", error: error.message });
+    }
 });
 
 module.exports = {
@@ -88,5 +114,5 @@ module.exports = {
     createContact,
     getContact,
     updateContact,
-    deleteContact,
+    deleteContact
 };

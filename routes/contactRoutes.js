@@ -1,6 +1,5 @@
 const express = require("express");
-const router = express.Router();
-const {    
+const {
     getContacts,
     createContact,
     getContact,
@@ -9,9 +8,16 @@ const {
 } = require("../controllers/contactController");
 const validateToken = require("../middleware/validateTokenHandler");
 
+const router = express.Router();
+
+// Apply validateToken middleware globally to all routes in this router
 router.use(validateToken);
-router.route("/").get(getContacts).post(createContact);
-router.route("/:id").get(getContact).put(updateContact).delete(deleteContact);
+
+// Contacts routes
+router.get("/", getContacts);
+router.post("/", createContact);
+router.get("/:id", getContact);
+router.put("/:id", updateContact);
+router.delete("/:id", deleteContact);
 
 module.exports = router;
-
