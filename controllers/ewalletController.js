@@ -4,7 +4,7 @@
 
 const ewalletService = require('../services/ewalletService');
 
-// Add funds
+//add funds
 const addFunds = async (req, res) => {
     try {
         const { amount } = req.body;
@@ -16,7 +16,7 @@ const addFunds = async (req, res) => {
     }
 };
 
-// Subtract funds
+//subtract funds
 const subtractFunds = async (req, res) => {
     try {
         const { amount } = req.body;

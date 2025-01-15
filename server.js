@@ -19,7 +19,6 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use("/api/contacts", require("./routes/contactRoutes"));
 app.use("/api/users", require("./routes/userRoutes"));
-
 //ewallet
 app.use("/api/ewallet", require("./routes/ewalletRoutes"));
 app.use(errorHandler);
