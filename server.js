@@ -13,19 +13,24 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 //CORS configuration
-app.use(cors({
-    origin: process.env.NODE_ENV === 'production'
-    ? 'https://ewallet-frontend-1.herokuapp.com' 
-    : 'http://localhost:5000',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'], //allowed method
-    allowedHeaders: ['Content-Type', 'Authorization'], //allowed headers
-    credentials: true //enable set cookie
-}));
+const allowedOrigins = [
+    'http://localhost:5173/', //adjust port for frontend
+];
 
-// Add this before your routes
-app.use((req, res, next) => {
-    next();
-});
+const corsOptions = {
+    origin: (origin, callback) => {
+        if(!origin || allowedOrigins.includes(origin)){
+            callback(null, true);
+        }else{
+            callback(new Error("Not allowed by CORS"), false); //directly ue error constructor
+        }
+    },
+    credentials: true,
+    allowedHeaders: "Origin, X-Requested-With, Content-Type, Accept, Authorization",
+    methods: "GET, HEAD, PUT, PATCH, POST, DELETE",
+};
+
+app.use(cors(corsOptions));
 
 app.use(express.json());
 
@@ -43,3 +48,4 @@ app.use(errorHandler);
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });
+
