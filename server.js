@@ -14,7 +14,7 @@ const port = process.env.PORT || 5000;
 
 //CORS configuration
 const allowedOrigins = [
-    'http://localhost:5173/', //adjust port for frontend
+    'http://localhost:5173', //adjust port for frontend
 ];
 
 const corsOptions = {
