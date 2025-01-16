@@ -4,21 +4,20 @@
 
 const ewalletService = require('../services/ewalletService');
 const asyncHandler = require('express-async-handler');
-//const Wallet = require('../models/walletModel');
 
-/*
+
 //get balance
 const getBalance = asyncHandler(async (req, res) => {
-    const userId = req.user.id;
-    const wallet = await Wallet.findOne({ where: { user_id: userId } });
-
-    if(!wallet){
-        res.status(404);
-        throw new Error("Wallet not found");
+    try {
+        const userId = req.user.id;
+        const wallet = await ewalletService.findWallet(userId);
+        res.status(200).json({ balance: wallet.balance });
+    } catch (err) {
+        res.status(400).json({ error: err.message });
     }
-    res.status(200).json({ balance: wallet.balance });
 });
 
+/*
 //create wallet if no wallet detected for user
 const createWallet = asyncHandler(async (req, res) => {
     const userId = req.user.id;
@@ -28,8 +27,8 @@ const createWallet = asyncHandler(async (req, res) => {
     });
     res.status(201).json(wallet);
 });
-
 */
+
 
 //add funds
 const addFunds = async (req, res) => {
@@ -55,8 +54,10 @@ const subtractFunds = async (req, res) => {
     }
 };
 
+//transfer funds **HAVENT ADD
+
 module.exports = {
-    //getBalance,
+    getBalance,
     //createWallet,
     addFunds,
     subtractFunds,
