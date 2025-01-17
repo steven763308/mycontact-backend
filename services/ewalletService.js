@@ -10,6 +10,13 @@ async function findWallet(userId) {
     return wallet;
 }
 
+// Get balance
+async function getBalance(userId) {
+    const wallet = await findWallet(userId);
+    console.log(`Current balance for user ${userId}: ${wallet.balance}`); // Log the balance before responding
+    return wallet.balance;
+}
+
 // Helper: Log a transaction
 async function logTransaction(walletId, type, amount, details) {
     await Transaction.create({
@@ -62,6 +69,8 @@ async function transferFunds(fromUserId, toUserId, amount) {
 }
 
 module.exports = {
+    findWallet,
+    getBalance,
     addFunds,
     subtractFunds,
     transferFunds,

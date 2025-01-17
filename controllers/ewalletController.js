@@ -12,8 +12,10 @@ const getBalance = asyncHandler(async (req, res) => {
         const userId = req.user.id;
         const wallet = await ewalletService.findWallet(userId);
         res.status(200).json({ balance: wallet.balance });
+        console.log(`Current balance for user ${userId}: ${wallet.balance}`);
     } catch (err) {
         res.status(400).json({ error: err.message });
+        console.log("Error: ", err.message);
     }
 });
 
