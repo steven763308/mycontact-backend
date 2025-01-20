@@ -12,8 +12,8 @@ async function findWallet(userId) {
 
 //create wallet
 const createWallet = async (userId) => {
-    const newWallet = new ewalletModel({user_id: userId, balance: 0});
-    return await newWallet.save();
+    const newWallet = new Ewallet.create({user_id: userId, balance: 0});
+    return newWallet;
 }
 
 // Get balance
