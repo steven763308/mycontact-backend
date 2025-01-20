@@ -56,16 +56,26 @@ const subtractFunds = async (req, res) => {
 };
 
 //transfer funds 
-const transferFunds = async (req, res) => {
+const transferFunds = asyncHandler(async (req, res) => {
     try {
         const { amount, recipientId } = req.body;
         const userId = req.user.id;
         const { fromWallet, toWallet } = await ewalletService.transferFunds(userId, recipientId, amount);
-        res.status(200).json({newBalance: fromWallet.balance});
+        res.status(200).json({ newBalance: fromWallet.balance });
     } catch (err) {
         res.status(400).json({ error: err.message });
     }
-};
+});
+
+const getTransactionHistory = asyncHandler(async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        const transactions = await ewalletService.getTransactionHistory(userId);
+        res.status(200).json(transactions);
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+});
 
 module.exports = {
     getBalance,
@@ -73,5 +83,5 @@ module.exports = {
     addFunds,
     subtractFunds,
     transferFunds,
-    //getTransactionHistory,
+    getTransactionHistory,
 };

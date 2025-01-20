@@ -6,15 +6,19 @@ const Transaction = require('../models/transactionModel');
 // Helper: Find wallet by userId
 async function findWallet(userId) {
     const wallet = await Ewallet.findOne({ where: { user_id: userId } });
-    if (!wallet) throw new Error('Wallet not found');
+    if (!wallet) throw new Error('Recipient wallet not found!!');
     return wallet;
 }
 
-//create wallet
-const createWallet = async (userId) => {
-    const newWallet = new Ewallet.create({user_id: userId, balance: 0});
-    return newWallet;
-}
+const createWallet = async () => {
+    try {
+        const response = await axiosInstance.post(`/create`);
+        return response.data;
+    } catch (error) {
+        console.error('Error creating wallet:', error);
+        throw error;
+    }
+};
 
 // Get balance
 async function getBalance(userId) {
@@ -54,9 +58,12 @@ async function subtractFunds(userId, amount) {
 
 // Transfer funds
 async function transferFunds(fromUserId, toUserId, amount) {
+    if(fromUserId === toUserId) throw new Error('Cannot transfer to own account');
+
     const fromWallet = await findWallet(fromUserId);
     const toWallet = await findWallet(toUserId);
 
+    if(!toWallet) throw new Error('Recipient wallet not found');
     if (fromWallet.balance < amount) throw new Error('Insufficient balance');
 
     fromWallet.balance = parseFloat(fromWallet.balance) - parseFloat(amount);
@@ -71,6 +78,14 @@ async function transferFunds(fromUserId, toUserId, amount) {
     return { fromWallet, toWallet };
 }
 
+//get transaction history
+// Get transaction history
+async function getTransactionHistory(userId) {
+    const wallet = await findWallet(userId);
+    const transactions = await Transaction.findAll({ where: { wallet_id: wallet.wallet_id } });
+    return transactions;
+}
+
 module.exports = {
     findWallet,
     createWallet,
@@ -78,5 +93,6 @@ module.exports = {
     addFunds,
     subtractFunds,
     transferFunds,
+    getTransactionHistory,
 };
 
