@@ -10,6 +10,12 @@ async function findWallet(userId) {
     return wallet;
 }
 
+//create wallet
+const createWallet = async (userId) => {
+    const newWallet = new ewalletModel({user_id: userId, balance: 0});
+    return await newWallet.save();
+}
+
 // Get balance
 async function getBalance(userId) {
     const wallet = await findWallet(userId);
@@ -30,9 +36,8 @@ async function logTransaction(walletId, type, amount, details) {
 // Add funds
 async function addFunds(userId, amount) {
     const wallet = await findWallet(userId);
-    wallet.balance += amount;
+    wallet.balance = parseFloat(amount) + parseFloat(wallet.balance);
     await wallet.save();
-
     await logTransaction(wallet.wallet_id, 'add', amount, 'Funds added');
     return wallet;
 }
@@ -41,10 +46,8 @@ async function addFunds(userId, amount) {
 async function subtractFunds(userId, amount) {
     const wallet = await findWallet(userId);
     if (wallet.balance < amount) throw new Error('Insufficient balance');
-
-    wallet.balance -= amount;
+    wallet.balance = parseFloat(wallet.balance) - parseFloat(amount);
     await wallet.save();
-
     await logTransaction(wallet.wallet_id, 'subtract', amount, 'Funds subtracted');
     return wallet;
 }
@@ -70,6 +73,7 @@ async function transferFunds(fromUserId, toUserId, amount) {
 
 module.exports = {
     findWallet,
+    createWallet,
     getBalance,
     addFunds,
     subtractFunds,

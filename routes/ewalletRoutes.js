@@ -9,6 +9,7 @@ const validateToken = require('../middleware/validateTokenHandler');
 router.use(validateToken);
 
 router.get('/balance', ewalletController.getBalance);
+router.post('/create', ewalletController.createWallet);
 router.post('/addFunds', ewalletController.addFunds);
 router.post('/subtractFunds', ewalletController.subtractFunds);
 // Add more routes for balance, transaction history, etc.

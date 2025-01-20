@@ -19,24 +19,23 @@ const getBalance = asyncHandler(async (req, res) => {
     }
 });
 
-/*
 //create wallet if no wallet detected for user
 const createWallet = asyncHandler(async (req, res) => {
-    const userId = req.user.id;
-    const wallet = await Wallet.create({
-        user_id: userId,
-        balance: 0,
-    });
-    res.status(201).json(wallet);
+    try {
+        const userId = req.user.id;
+        const wallet = await ewalletService.createWallet(userId);
+        res.status(201).json(wallet);
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
 });
-*/
-
 
 //add funds
 const addFunds = async (req, res) => {
     try {
         const { amount } = req.body;
         const userId = req.user.id; // Assuming user ID is available via middleware
+        console.log(typeof amount);
         const wallet = await ewalletService.addFunds(userId, amount);
         res.status(200).json(wallet);
     } catch (err) {
@@ -60,7 +59,7 @@ const subtractFunds = async (req, res) => {
 
 module.exports = {
     getBalance,
-    //createWallet,
+    createWallet,
     addFunds,
     subtractFunds,
 };

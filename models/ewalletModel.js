@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/database'); // Correct import using destructuring
 
-console.log('Sequelize instance:', sequelize); // Debugging log to ensure the instance is valid
+//console.log('Sequelize instance:', sequelize); // Debugging log to ensure the instance is valid
 
 const Ewallet = sequelize.define('Ewallet', {
     wallet_id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
