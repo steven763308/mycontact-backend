@@ -55,12 +55,23 @@ const subtractFunds = async (req, res) => {
     }
 };
 
-//transfer funds **HAVENT ADD
+//transfer funds 
+const transferFunds = async (req, res) => {
+    try {
+        const { amount, recipientId } = req.body;
+        const userId = req.user.id;
+        const { fromWallet, toWallet } = await ewalletService.transferFunds(userId, recipientId, amount);
+        res.status(200).json({newBalance: fromWallet.balance});
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+};
 
 module.exports = {
     getBalance,
     createWallet,
     addFunds,
     subtractFunds,
+    transferFunds,
     //getTransactionHistory,
 };

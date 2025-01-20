@@ -59,8 +59,8 @@ async function transferFunds(fromUserId, toUserId, amount) {
 
     if (fromWallet.balance < amount) throw new Error('Insufficient balance');
 
-    fromWallet.balance -= amount;
-    toWallet.balance += amount;
+    fromWallet.balance = parseFloat(fromWallet.balance) - parseFloat(amount);
+    toWallet.balance = parseFloat(toWallet.balance) + parseFloat(amount);
 
     await fromWallet.save();
     await toWallet.save();
