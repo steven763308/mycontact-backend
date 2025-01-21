@@ -1,131 +1,129 @@
 const asyncHandler = require("express-async-handler");
-const Contact = require('../models/contactModel'); // Ensure this path is correct
-const User = require('../models/userModel'); // Ensure this is correctly imported if used
+const Contact = require("../models/contactModel");
 
-// Get all contacts
+/**
+ * @desc Get all contacts for the authenticated user
+ * @route GET /api/contacts
+ * @access Private
+ */
 const getContacts = asyncHandler(async (req, res) => {
+    const userId = req.user.id;
+
     try {
-        console.log("Fetching contacts for user ID:", req.user.id);
-
-        // Fetch all contacts associated with the user ID
-        const contacts = await Contact.findAll({
-            where: { user_id: req.user.id },
-            //logging: console.log //log SQL query being executed
-        });
-
-        //console.log("Contacts fetched:", JSON.stringify(contacts, null, 2));
+        const contacts = await Contact.findAll({ where: { user_id: userId } });
         res.status(200).json(contacts);
     } catch (error) {
-        //console.error("Error fetching contacts:", error);
+        console.error("Error fetching contacts:", error.message);
         res.status(500).json({ message: "Failed to fetch contacts", error: error.message });
     }
 });
 
-// Create a new contact
+/**
+ * @desc Create a new contact
+ * @route POST /api/contacts
+ * @access Private
+ */
 const createContact = asyncHandler(async (req, res) => {
     const { name, email, phone } = req.body;
+
     if (!name || !email || !phone) {
-        res.status(400).json({ message: "All fields are mandatory!" });
-        return;
+        return res.status(400).json({ message: "All fields are mandatory!" });
     }
+
     try {
         const contact = await Contact.create({
             name,
             email,
             phone,
-            user_id: req.user.id
+            user_id: req.user.id,
         });
 
         res.status(201).json(contact);
     } catch (error) {
-        console.error("Error creating contact:", error);
+        console.error("Error creating contact:", error.message);
         res.status(500).json({ message: "Failed to create contact", error: error.message });
     }
 });
 
-// Get a single contact
+/**
+ * @desc Get a single contact by ID
+ * @route GET /api/contacts/:id
+ * @access Private
+ */
 const getContact = asyncHandler(async (req, res) => {
+    const userId = req.user.id;
+    const contactId = req.params.id;
+
     try {
-        console.log("Received request to get contact with ID:", req.params.id);
-        const contact = await Contact.findByPk(req.params.id);
-        
+        const contact = await Contact.findByPk(contactId);
+
         if (!contact) {
-            console.log("Contact not found for ID:", req.params.id);
-            res.status(404).json({ message: "Contact not found" });
-            return;
+            return res.status(404).json({ message: "Contact not found" });
         }
 
-        console.log(`Found contact with ID: ${req.params.id} for user ID: ${contact.user_id}`);
-        
-        // Convert both user_id values to integers for reliable comparison
-        if (parseInt(contact.user_id) !== parseInt(req.user.id)) {
-            console.log(`User ID mismatch: Contact owned by ${contact.user_id}, request by ${req.user.id}`);
-            res.status(403).json({ message: "User doesn't have permission to view this contact" });
-            return;
+        if (parseInt(contact.user_id) !== parseInt(userId)) {
+            return res.status(403).json({ message: "Access denied to this contact" });
         }
 
-        console.log(`Returning contact with ID: ${req.params.id} to user ID: ${req.user.id}`);
         res.status(200).json(contact);
     } catch (error) {
-        console.error("Error fetching contact:", error);
+        console.error("Error fetching contact:", error.message);
         res.status(500).json({ message: "Failed to fetch contact", error: error.message });
     }
 });
 
-// Update a contact
+/**
+ * @desc Update a contact by ID
+ * @route PUT /api/contacts/:id
+ * @access Private
+ */
 const updateContact = asyncHandler(async (req, res) => {
+    const userId = req.user.id;
+    const contactId = req.params.id;
+
     try {
-        const contact = await Contact.findByPk(req.params.id);
+        const contact = await Contact.findByPk(contactId);
+
         if (!contact) {
-            console.log("Contact not found for ID:", req.params.id); // Debugging log
-            res.status(404).json({ message: "Contact not found" });
-            return;
+            return res.status(404).json({ message: "Contact not found" });
         }
 
-        // Debugging log to verify data types and values
-        console.log(`User attempting to update contact: ${req.user.id} (Type: ${typeof req.user.id}), Contact owner ID: ${contact.user_id} (Type: ${typeof contact.user_id})`);
-
-        // Convert both user_id values to integers for reliable comparison
-        if (parseInt(contact.user_id) !== parseInt(req.user.id)) {
-            console.log(`Permission denied: Contact owned by ${contact.user_id}, request by ${req.user.id}`); // Debugging log
-            res.status(403).json({ message: "User doesn't have permission to update this contact" });
-            return;
+        if (parseInt(contact.user_id) !== parseInt(userId)) {
+            return res.status(403).json({ message: "Access denied to update this contact" });
         }
 
         const updatedContact = await contact.update(req.body);
-        console.log(`Contact updated successfully by user ${req.user.id}`); // Debugging log
         res.status(200).json(updatedContact);
     } catch (error) {
-        console.error("Error updating contact:", error);
+        console.error("Error updating contact:", error.message);
         res.status(500).json({ message: "Failed to update contact", error: error.message });
     }
 });
 
-// Delete a contact
+/**
+ * @desc Delete a contact by ID
+ * @route DELETE /api/contacts/:id
+ * @access Private
+ */
 const deleteContact = asyncHandler(async (req, res) => {
+    const userId = req.user.id;
+    const contactId = req.params.id;
+
     try {
-        const contact = await Contact.findByPk(req.params.id);
+        const contact = await Contact.findByPk(contactId);
+
         if (!contact) {
-            console.log("Contact not found for ID:", req.params.id); // Debugging log
-            res.status(404).json({ message: "Contact not found" });
-            return;
+            return res.status(404).json({ message: "Contact not found" });
         }
 
-        // Debugging log to verify data types and values
-        console.log(`User attempting to delete contact: ${req.user.id} (Type: ${typeof req.user.id}), Contact owner ID: ${contact.user_id} (Type: ${typeof contact.user_id})`);
-
-        // Convert both user_id values to integers for reliable comparison
-        if (parseInt(contact.user_id) !== parseInt(req.user.id)) {
-            console.log(`Permission denied: Contact owned by ${contact.user_id}, request by ${req.user.id}`); // Debugging log
-            res.status(403).json({ message: "User doesn't have permission to delete this contact" });
-            return;
+        if (parseInt(contact.user_id) !== parseInt(userId)) {
+            return res.status(403).json({ message: "Access denied to delete this contact" });
         }
 
         await contact.destroy();
-        console.log(`Contact deleted successfully by user ${req.user.id}`); // Debugging log
         res.status(200).json({ message: "Contact deleted successfully" });
     } catch (error) {
-        console.error("Error deleting contact:", error);
+        console.error("Error deleting contact:", error.message);
         res.status(500).json({ message: "Failed to delete contact", error: error.message });
     }
 });
@@ -135,5 +133,5 @@ module.exports = {
     createContact,
     getContact,
     updateContact,
-    deleteContact
+    deleteContact,
 };

@@ -21,14 +21,28 @@ const getBalance = asyncHandler(async (req, res) => {
 
 //create wallet if no wallet detected for user
 const createWallet = asyncHandler(async (req, res) => {
+    const userId = req.user.id; // Assuming `req.user` contains the authenticated user info
+
     try {
-        const userId = req.user.id;
-        const wallet = await ewalletService.createWallet(userId);
+        // Validate the user ID
+        if (!userId) {
+            return res.status(400).json({ error: "User ID is required." });
+        }
+
+        // Current DateTime
+        const now = new Date();
+
+        // Insert the new wallet into the database using a service or raw query
+        const wallet = await ewalletService.createWallet(userId, "0", now, now);
+
+        // Respond with the newly created wallet
         res.status(201).json(wallet);
     } catch (err) {
-        res.status(400).json({ error: err.message });
+        console.error("Error creating wallet:", err.message);
+        res.status(500).json({ error: "Unable to create wallet. Please try again later." });
     }
 });
+
 
 //add funds
 const addFunds = async (req, res) => {

@@ -1,28 +1,43 @@
-const {constants} = require("../constants");
+const { constants } = require("../constants");
+
+/**
+ * @desc Global error handler middleware
+ */
 const errorHandler = (err, req, res, next) => {
     const statusCode = res.statusCode ? res.statusCode : 500;
+
+    // Common error response format
+    const errorResponse = {
+        title: "",
+        message: err.message,
+        stackTrace: process.env.NODE_ENV === "development" ? err.stack : undefined, // Include stack trace only in development
+    };
+
     switch (statusCode) {
         case constants.VALIDATION_ERROR:
-            res.json({title: "Validation Failed", message: err.message, stackTrace: err.stack});
+            errorResponse.title = "Validation Failed";
             break;
-    
+
         case constants.NOT_FOUND:
-            res.json({title: "Not Found", message: err.message, stackTrace: err.stack});
+            errorResponse.title = "Not Found";
+            break;
 
         case constants.UNAUTHORIZED:
-            res.json({title: "Unauthorized", message: err.message, stackTrace: err.stack});
-    
-        case constants.FORBIDDEN:
-            res.json({title: "Forbidden", message: err.message, stackTrace: err.stack});
-    
-        case constants.SERVER_ERROR:
-            res.json({title: "Server Error", message: err.message, stackTrace: err.stack});
-    
+            errorResponse.title = "Unauthorized";
+            break;
 
+        case constants.FORBIDDEN:
+            errorResponse.title = "Forbidden";
+            break;
+
+        case constants.SERVER_ERROR:
         default:
-                console.log("No Error, All good!");
+            errorResponse.title = "Server Error";
             break;
     }
+
+    // Send the error response
+    res.status(statusCode).json(errorResponse);
 };
 
 module.exports = errorHandler;

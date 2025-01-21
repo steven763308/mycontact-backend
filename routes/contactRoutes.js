@@ -10,7 +10,7 @@ const validateToken = require("../middleware/validateTokenHandler");
 
 const router = express.Router();
 
-// Apply validateToken middleware globally to all routes in this router
+// Middleware: Apply validateToke to all routes
 router.use(validateToken);
 
 // Contacts routes

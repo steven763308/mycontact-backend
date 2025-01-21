@@ -1,25 +1,78 @@
 const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/database'); // Correct import using destructuring
 
-//console.log('Sequelize instance:', sequelize); // Debugging log to ensure the instance is valid
+module.exports = (sequelize) => {
+    const Ewallet = sequelize.define('Ewallet', {
+        wallet_id: {
+            type: DataTypes.INTEGER,
+            primaryKey: true,
+            autoIncrement: true
+        },
+        user_id: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: 'users',
+                key: 'id'
+            },
+            validate: {
+                notNull: { msg: 'User ID is required' }
+            }
+        },
+        balance: {
+            type: DataTypes.FLOAT,
+            allowNull: false,
+            defaultValue: 0.0
+        }
+    }, {
+        tableName: 'ewallet',
+        timestamps: true,
+    });
 
-const Ewallet = sequelize.define('Ewallet', {
-    wallet_id: { 
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true 
-    },
-    user_id: { 
-        type: DataTypes.INTEGER, 
-        allowNull: false 
-    },
-    balance: { 
-        type: DataTypes.DECIMAL(10, 2), 
-        allowNull: false,
-        defaultValue: 0 },
-}, {
-    timestamps: true, // Adds createdAt and updatedAt columns
-    tableName: 'ewallet',
-});
+    const EwalletTransaction = sequelize.define('EwalletTransaction', {
+        transaction_id: {
+            type: DataTypes.INTEGER,
+            primaryKey: true,
+            autoIncrement: true
+        },
+        ewallet_id: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: 'ewallets',
+                key: 'wallet_id'
+            },
+            validate: {
+                notNull: { msg: 'Ewallet ID is required' }
+            }
+        },
+        amount: {
+            type: DataTypes.FLOAT,
+            allowNull: false
+        },
+        transaction_type: {
+            type: DataTypes.ENUM('credit', 'debit'),
+            allowNull: false
+        }
+    }, {
+        tableName: 'ewallet_transactions',
+        timestamps: true
+    });
 
-module.exports = Ewallet;
+    // Define associations
+    Ewallet.associate = (models) => {
+        Ewallet.hasMany(models.EwalletTransaction, {
+            foreignKey: 'ewallet_id',
+            as: 'transactions',
+            onDelete: 'CASCADE'
+        });
+    };
+
+    EwalletTransaction.associate = (models) => {
+        EwalletTransaction.belongsTo(models.Ewallet, {
+            foreignKey: 'ewallet_id',
+            as: 'ewallet'
+        });
+    };
+
+    return { Ewallet, EwalletTransaction };
+};

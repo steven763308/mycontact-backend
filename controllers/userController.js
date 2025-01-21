@@ -1,90 +1,122 @@
 const asyncHandler = require("express-async-handler");
-const bcrypt =require("bcrypt");
+const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
 
-//@desc Register a user
-//@route POST /api/users/register
-//@access public
+/**
+ * @desc Register a new user
+ * @route POST /api/users/register
+ * @access Public
+ */
 const registerUser = asyncHandler(async (req, res) => {
-    const{username, email, password} = req.body;
-    if(!username || !email || !password){
+    const { username, email, password } = req.body;
+
+    console.log("Registering user:", { username, email }); // Debugging log
+
+    if (!username || !email || !password) {
         res.status(400);
         throw new Error("All fields are mandatory!");
     }
-    const userExists = await User.findOne({where:{email}});
-    if(userExists){
+
+    const userExists = await User.findOne({ where: { email } });
+    console.log("User exists check:", userExists ? "User exists" : "User does not exist"); // Debugging log
+
+    if (userExists) {
         res.status(400);
         throw new Error("User already registered!");
     }
 
-    //hash password
     const hashedPassword = await bcrypt.hash(password, 10);
-    console.log("Hashed Password: ", hashedPassword);
+    console.log("Hashed password:", hashedPassword); // Debugging log
+
     const user = await User.create({
         username,
         email,
         password: hashedPassword,
     });
 
-    console.log(`User created ${user}`);
-    if(user){
+    if (user) {
+        console.log("User successfully created:", user); // Debugging log
         res.status(201).json({
             id: user.id,
             username: user.username,
-            email: user.email
+            email: user.email,
         });
-    }else{
+    } else {
         res.status(400);
-        throw new Error("User data us not valid");
+        throw new Error("Invalid user data");
     }
-    res.json({message: "Register the user"});
 });
 
-//@desc Login user
-//@route POST /api/users/login
-//@access public
+/**
+ * @desc Authenticate a user and return a token
+ * @route POST /api/users/login
+ * @access Public
+ */
 const loginUser = asyncHandler(async (req, res) => {
-    const {email, password} = req.body;
-    console.log("Email: ", email);
-    if(!email || !password){
+    const { email, password } = req.body;
+
+    console.log("Attempting login with:", { email, password }); // Debugging log
+
+    if (!email || !password) {
         res.status(400);
         throw new Error("All fields are mandatory!");
     }
-    const user = await User.findOne({where:{email}});
-    //compare password with hashedpassword
-    if(user && (await bcrypt.compare(password, user.password))){
-        const accessToken = jwt.sign({
-            user: {
-                username: user.username,
-                email: user.email,
-                id: user.id,
+
+    const user = await User.findOne({ where: { email } });
+    console.log("User lookup result:", user); // Debugging log
+
+    if (user && (await bcrypt.compare(password, user.password))) {
+        console.log("Password validation successful for user:", user.email); // Debugging log
+
+        const accessToken = jwt.sign(
+            {
+                user: {
+                    id: user.id,
+                    username: user.username,
+                    email: user.email,
+                },
             },
-        }, 
-        process.env.ACCESS_TOKEN_SECRET,
-        {expiresIn: "30m"}
-    );
-        res.status(200).json({accessToken});
-    }else{
+            process.env.ACCESS_TOKEN_SECRET,
+            { expiresIn: "30m" }
+        );
+
+        console.log("Generated JWT token:", accessToken); // Debugging log
+        res.status(200).json({ accessToken });
+    } else {
+        console.error("Invalid email or password for:", email); // Debugging log
         res.status(401);
-        throw new Error("Email or Password is not valid");
+        throw new Error("Invalid email or password");
     }
 });
 
-//@desc Current user info
-//@route POST /api/users/current
-//@access private
+/**
+ * @desc Get current authenticated user info
+ * @route GET /api/users/current
+ * @access Private
+ */
 const currentUser = asyncHandler(async (req, res) => {
+    console.log("Fetching current user info:", req.user); // Debugging log
     res.json(req.user);
 });
 
-getUserProfile = asyncHandler(async (req, res) => {
-    const user = req.user
+/**
+ * @desc Get user profile information
+ * @route GET /api/users/profile
+ * @access Private
+ */
+const getUserProfile = asyncHandler(async (req, res) => {
+    console.log("Fetching profile info for user:", req.user); // Debugging log
     res.json({
-        name: user.name,
-        email: user.email,
-        username: user.username,
+        id: req.user.id,
+        username: req.user.username,
+        email: req.user.email,
     });
 });
 
-module.exports = {registerUser, loginUser, currentUser, getUserProfile};
+module.exports = {
+    registerUser,
+    loginUser,
+    currentUser,
+    getUserProfile,
+};
