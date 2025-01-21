@@ -10,15 +10,27 @@ async function findWallet(userId) {
     return wallet;
 }
 
-const createWallet = async () => {
+//create wallet
+// Create or find eWallet for a user
+async function createWallet(userId) {
     try {
-        const response = await axiosInstance.post(`/create`);
-        return response.data;
+        // Check if wallet exists for the user
+        let wallet = await Ewallet.findOne({ where: { user_id: userId } });
+
+        if (!wallet) {
+            // Create wallet if it doesn't exist
+            wallet = await Ewallet.create({ user_id: userId, balance: 0 });
+            console.log(`Wallet created for user ${userId}`);
+        } else {
+            console.log(`Wallet already exists for user ${userId}`);
+        }
+
+        return wallet;
     } catch (error) {
-        console.error('Error creating wallet:', error);
+        console.error('Error creating or finding wallet:', error);
         throw error;
     }
-};
+}
 
 // Get balance
 async function getBalance(userId) {

@@ -6,7 +6,7 @@ const dotenv = require("dotenv").config();
 const cors = require("cors"); //added cors package
 
 connectDb().then(() => {
-    sequelize.sync(); // Sync all models
+    sequelize.sync({force:false}); // Sync all models
 });
 
 const app = express();

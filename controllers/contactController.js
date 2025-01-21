@@ -10,13 +10,13 @@ const getContacts = asyncHandler(async (req, res) => {
         // Fetch all contacts associated with the user ID
         const contacts = await Contact.findAll({
             where: { user_id: req.user.id },
-            logging: console.log //log SQL query being executed
+            //logging: console.log //log SQL query being executed
         });
 
-        console.log("Contacts fetched:", JSON.stringify(contacts, null, 2));
+        //console.log("Contacts fetched:", JSON.stringify(contacts, null, 2));
         res.status(200).json(contacts);
     } catch (error) {
-        console.error("Error fetching contacts:", error);
+        //console.error("Error fetching contacts:", error);
         res.status(500).json({ message: "Failed to fetch contacts", error: error.message });
     }
 });
