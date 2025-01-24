@@ -55,8 +55,7 @@ const registerUser = asyncHandler(async (req, res) => {
  */
 const loginUser = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
-
-    console.log("Attempting login with:", { email, password }); // Debugging log
+    //console.log("Attempting login with:", { email, password }); // Debugging log
 
     if (!email || !password) {
         res.status(400);

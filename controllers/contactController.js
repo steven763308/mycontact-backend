@@ -1,5 +1,5 @@
 const asyncHandler = require("express-async-handler");
-const Contact = require("../models/contactModel");
+const {Contact} = require("../models/contactModel");
 
 /**
  * @desc Get all contacts for the authenticated user

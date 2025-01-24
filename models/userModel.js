@@ -1,7 +1,7 @@
 const { Sequelize, DataTypes } = require('sequelize');
 
 // Establishing a connection to the database
-const sequelize = new Sequelize('mysql://app_user:password123@localhost:3306/mycontacts', {
+const sequelize = new Sequelize('mysql://app_user:password123@localhost:3306/intern_mycontacts', {
     logging: false, // Disables logging; set to console.log to see SQL queries
     define: {
         freezeTableName: true // Disables the automatic pluralization of table names
@@ -32,6 +32,14 @@ const User = sequelize.define('User', {
         validate: {
             notEmpty: true,
             len: [8, 100] // Password length must be between 8 and 100 characters
+        }
+    },
+    role: {
+        type: DataTypes.ENUM('member', 'admin'),
+        allowNull: true,
+        defaultValue: 'member',
+        validate: {
+            isIn: [['member', 'admin']] // Ensures the value is either 'user' or 'admin'
         }
     },
     createdAt: {

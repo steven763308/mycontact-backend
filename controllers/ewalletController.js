@@ -33,7 +33,7 @@ const createWallet = asyncHandler(async (req, res) => {
         const now = new Date();
 
         // Insert the new wallet into the database using a service or raw query
-        const wallet = await ewalletService.createWallet(userId, "0", now, now);
+        const wallet = await ewalletService.createWallet(userId, "0", "1", now, now);
 
         // Respond with the newly created wallet
         res.status(201).json(wallet);

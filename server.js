@@ -19,7 +19,7 @@ connectDb()
 
 // CORS Configuration
 const allowedOrigins = [
-    "http://localhost:5173", // Adjust as per frontend setup
+    "http://localhost:3000", // Adjust as per frontend setup
 ];
 const corsOptions = {
     origin: (origin, callback) => {

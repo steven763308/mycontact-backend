@@ -1,10 +1,10 @@
-const Ewallet = require("../models/ewalletModel");
+const {Ewallet} = require("../models/ewalletModel");
 const Transaction = require("../models/transactionModel");
 
 //Helper: Find wallet by userId
 async function findWallet(userId) {
     try {
-        const wallet = await Ewallet.findOne({ where: { user_id: userId } });
+        const wallet = await Ewallet.findOne({ where: { userId : userId } });
         if (!wallet) throw new Error("Wallet not found for the specified user");
         return wallet;
     } catch (error) {
@@ -16,9 +16,9 @@ async function findWallet(userId) {
 //Create or find eWallet for a user
 async function createWallet(userId) {
     try {
-        let wallet = await Ewallet.findOne({ where: { user_id: userId } });
+        const wallet = await Ewallet.findOne({ where: { userId: userId } });
         if (!wallet) {
-            wallet = await Ewallet.create({ user_id: userId, balance: 0 });
+            wallet = await Ewallet.create({ userId: userId, balance: 0 });
             console.log(`Wallet created for user ${userId}`);
         } else {
             console.log(`Wallet already exists for user ${userId}`);
@@ -61,9 +61,9 @@ async function logTransaction(walletId, type, amount, details) {
 async function addFunds(userId, amount) {
     try {
         const wallet = await findWallet(userId);
-        wallet.balance += parseFloat(amount);
+        wallet.balance = parseFloat(wallet.balance) + parseFloat(amount);
         await wallet.save();
-        await logTransaction(wallet.wallet_id, "add", amount, "Funds added");
+        //await logTransaction(wallet.wallet_id, "add", amount, "Funds added");
         return wallet;
     } catch (error) {
         console.error(`Error adding funds for user ${userId}:`, error);
@@ -76,7 +76,7 @@ async function subtractFunds(userId, amount) {
     try {
         const wallet = await findWallet(userId);
         if (wallet.balance < amount) throw new Error("Insufficient balance");
-        wallet.balance -= parseFloat(amount);
+        wallet.balance = parseFloat(wallet.balance) - parseFloat(amount);
         await wallet.save();
         await logTransaction(wallet.wallet_id, "subtract", amount, "Funds subtracted");
         return wallet;
@@ -97,15 +97,15 @@ async function transferFunds(fromUserId, toUserId, amount) {
         if (fromWallet.balance < amount) throw new Error("Insufficient balance");
 
         // Adjust balances
-        fromWallet.balance -= parseFloat(amount);
-        toWallet.balance += parseFloat(amount);
+        fromWallet.balance = parseFloat(fromWallet.balance) - parseFloat(amount);
+        toWallet.balance = parseFloat(toWallet.balance) + parseFloat(amount);
 
         await fromWallet.save();
         await toWallet.save();
 
         // Log transactions
-        await logTransaction(fromWallet.wallet_id, "transfer", -amount, `Transferred to user ${toUserId}`);
-        await logTransaction(toWallet.wallet_id, "transfer", amount, `Received from user ${fromUserId}`);
+        //await logTransaction(fromWallet.wallet_id, "transfer", -amount, `Transferred to user ${toUserId}`);
+        //await logTransaction(toWallet.wallet_id, "transfer", amount, `Received from user ${fromUserId}`);
 
         return { fromWallet, toWallet };
     } catch (error) {
